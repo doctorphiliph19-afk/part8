@@ -1,3 +1,5 @@
+const crypto = require("crypto")
+
 // In-memory data storage
 let authors = [
   {
@@ -102,24 +104,25 @@ const resolvers = {
   },
   Mutation: {
     addBook: (root, args) => {
-      let author = authors.find(a => a.name === args.author)
-      if (!author) {
-        author = {
-          id: Math.random().toString(36),
+      const existingAuthor = authors.find(author => author.name === args.author)
+
+      if (!existingAuthor) {
+        authors.push({
           name: args.author,
-        }
-        authors.push(author)
+          id: crypto.randomUUID(),
+        })
       }
 
-      const book = {
+      const newBook = {
         title: args.title,
-        published: args.published,
         author: args.author,
+        published: args.published,
         genres: args.genres,
-        id: Math.random().toString(36),
+        id: crypto.randomUUID(),
       }
-      books.push(book)
-      return book
+
+      books.push(newBook)
+      return newBook
     },
     editAuthor: (root, args) => {
       const author = authors.find(a => a.name === args.name)
