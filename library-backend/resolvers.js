@@ -82,10 +82,22 @@ const resolvers = {
     bookCount: () => books.length,
     authorCount: () => authors.length,
     allBooks: (root, args) => {
-      if (args.genre) {
-        return books.filter(book => book.genres.includes(args.genre))
+      let filtered = books
+
+      if (args.author) {
+        const author = authors.find(a => a.name === args.author)
+        if (author) {
+          filtered = filtered.filter(book => book.author === author.id)
+        } else {
+          filtered = []
+        }
       }
-      return books
+
+      if (args.genre) {
+        filtered = filtered.filter(book => book.genres.includes(args.genre))
+      }
+
+      return filtered
     },
     allAuthors: () => authors,
   },
