@@ -29,49 +29,49 @@ let books = [
   {
     title: "Clean Code",
     published: 2008,
-    author: "afa51ab0-344d-11e9-a414-719c6709cf3e",
+    author: "Robert Martin",
     id: "afa5b6f4-344d-11e9-a414-719c6709cf3e",
     genres: ["refactoring"],
   },
   {
     title: "Agile software development",
     published: 2002,
-    author: "afa51ab0-344d-11e9-a414-719c6709cf3e",
+    author: "Robert Martin",
     id: "afa5b6f5-344d-11e9-a414-719c6709cf3e",
     genres: ["agile", "patterns", "design"],
   },
   {
     title: "Refactoring, edition 2",
     published: 2018,
-    author: "afa5b6f0-344d-11e9-a414-719c6709cf3e",
+    author: "Martin Fowler",
     id: "afa5de00-344d-11e9-a414-719c6709cf3e",
     genres: ["refactoring"],
   },
   {
     title: "Refactoring to patterns",
     published: 2008,
-    author: "afa5b6f2-344d-11e9-a414-719c6709cf3e",
+    author: "Joshua Kerievsky",
     id: "afa5de01-344d-11e9-a414-719c6709cf3e",
     genres: ["refactoring", "patterns"],
   },
   {
     title: "Practical Object-Oriented Design, An Agile Primer Using Ruby",
     published: 2012,
-    author: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
+    author: "Sandi Metz",
     id: "afa5de02-344d-11e9-a414-719c6709cf3e",
     genres: ["refactoring", "design"],
   },
   {
     title: "Crime and punishment",
     published: 1866,
-    author: "afa5b6f1-344d-11e9-a414-719c6709cf3e",
+    author: "Fyodor Dostoevsky",
     id: "afa5de03-344d-11e9-a414-719c6709cf3e",
     genres: ["classic", "crime"],
   },
   {
     title: "Demons",
     published: 1872,
-    author: "afa5b6f1-344d-11e9-a414-719c6709cf3e",
+    author: "Fyodor Dostoevsky",
     id: "afa5de04-344d-11e9-a414-719c6709cf3e",
     genres: ["classic", "revolution"],
   },
@@ -85,12 +85,7 @@ const resolvers = {
       let filtered = books
 
       if (args.author) {
-        const author = authors.find(a => a.name === args.author)
-        if (author) {
-          filtered = filtered.filter(book => book.author === author.id)
-        } else {
-          filtered = []
-        }
+        filtered = filtered.filter(book => book.author === args.author)
       }
 
       if (args.genre) {
@@ -101,12 +96,9 @@ const resolvers = {
     },
     allAuthors: () => authors,
   },
-  Book: {
-    author: (root) => authors.find(a => a.id === root.author),
-  },
   Author: {
     bookCount: (root) =>
-      books.filter(book => book.author === root.id).length,
+      books.filter(book => book.author === root.name).length,
   },
   Mutation: {
     addBook: (root, args) => {
@@ -122,7 +114,7 @@ const resolvers = {
       const book = {
         title: args.title,
         published: args.published,
-        author: author.id,
+        author: args.author,
         genres: args.genres,
         id: Math.random().toString(36),
       }
