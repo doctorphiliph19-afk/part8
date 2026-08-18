@@ -37,7 +37,14 @@ const typeDefs = `
       name: String!
       setBornTo: Int!
     ): Author
-    createUser(
+    createUser(    editAuthor: (root, args) => {
+      const author = authors.find(a => a.name === args.name)
+      if (!author) {
+        return null
+      }
+      author.born = args.setBornTo
+      return author
+    }
       username: String!
       password: String!
     ): User
