@@ -1,5 +1,3 @@
-const crypto = require("crypto")
-
 // In-memory data storage
 let authors = [
   {
@@ -103,27 +101,6 @@ const resolvers = {
       books.filter(book => book.author === root.name).length,
   },
   Mutation: {
-    addBook: (root, args) => {
-      const existingAuthor = authors.find(author => author.name === args.author)
-
-      if (!existingAuthor) {
-        authors.push({
-          name: args.author,
-          id: crypto.randomUUID(),
-        })
-      }
-
-      const newBook = {
-        title: args.title,
-        author: args.author,
-        published: args.published,
-        genres: args.genres,
-        id: crypto.randomUUID(),
-      }
-
-      books.push(newBook)
-      return newBook
-    },
     editAuthor: (root, args) => {
       const author = authors.find(a => a.name === args.name)
       if (!author) {

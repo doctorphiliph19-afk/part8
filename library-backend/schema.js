@@ -27,32 +27,21 @@ const typeDefs = `
   }
 
   type Mutation {
-    addBook(
-      title: String!
-      published: Int!
-      author: String!
-      genres: [String!]!
-    ): Book!
     editAuthor(
       name: String!
       setBornTo: Int!
     ): Author
-    createUser(    editAuthor: (root, args) => {
-      const author = authors.find(a => a.name === args.name)
-      if (!author) {
-        return null
-      }
-      author.born = args.setBornTo
-      return author
-    }
+
+    createUser(
       username: String!
       password: String!
     ): User
+
     login(
       username: String!
       password: String!
     ): String
   }
-`
+`;
 
-module.exports = typeDefs
+module.exports = typeDefs;
