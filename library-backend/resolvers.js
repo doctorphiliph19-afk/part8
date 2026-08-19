@@ -100,6 +100,9 @@ const resolvers = {
     bookCount: (root) =>
       books.filter(book => book.author === root.name).length,
   },
+  Book: {
+    author: (root) => authors.find(author => author.name === root.author),
+  },
   Mutation: {
     editAuthor: (root, args) => {
       const author = authors.find(a => a.name === args.name)
