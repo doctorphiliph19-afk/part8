@@ -104,6 +104,28 @@ const resolvers = {
     author: (root) => authors.find(author => author.name === root.author),
   },
   Mutation: {
+    addBook: (root, args) => {
+      let author = authors.find(existingAuthor => existingAuthor.name === args.author)
+
+      if (!author) {
+        author = {
+          id: `author-${Date.now()}`,
+          name: args.author,
+        }
+        authors = authors.concat(author)
+      }
+
+      const book = {
+        title: args.title,
+        published: args.published,
+        author: author.name,
+        genres: args.genres,
+        id: `book-${Date.now()}`,
+      }
+
+      books = books.concat(book)
+      return book
+    },
     editAuthor: (root, args) => {
       const author = authors.find(a => a.name === args.name)
       if (!author) {

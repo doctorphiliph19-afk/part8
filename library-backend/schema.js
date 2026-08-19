@@ -41,6 +41,13 @@ const typeDefs = `
       username: String!
       password: String!
     ): String
+
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]!
+    ): Book
   }
 `;
 
