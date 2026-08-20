@@ -44,4 +44,4 @@ const typeDefs = `
   }
 `
 
-module.exports = typeDefs
+module.exports = typeDefs;
