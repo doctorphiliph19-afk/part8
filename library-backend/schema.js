@@ -9,46 +9,36 @@ const typeDefs = `
 
   type Author {
     name: String!
-    id: ID!
     born: Int
-    bookCount: Int!
-  }
-
-  type User {
-    username: String!
+    bookCount: Int
     id: ID!
   }
 
   type Query {
     bookCount: Int!
     authorCount: Int!
-    allBooks(author: String, genre: String): [Book!]!
+    allBooks: [Book!]!
     allAuthors: [Author!]!
   }
 
   type Mutation {
+    addAuthor(
+      name: String!
+      born: Int
+    ): Author
+
     editAuthor(
       name: String!
       setBornTo: Int!
     ): Author
-
-    createUser(
-      username: String!
-      password: String!
-    ): User
-
-    login(
-      username: String!
-      password: String!
-    ): String
 
     addBook(
       title: String!
       author: String!
       published: Int!
       genres: [String!]!
-    ): Book
+    ): Book!
   }
-`;
+`
 
 module.exports = typeDefs;

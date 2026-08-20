@@ -1,16 +1,14 @@
-const { ApolloServer } = require("@apollo/server")
-const { startStandaloneServer } = require("@apollo/server/standalone")
+require("dotenv").config()
 
-const typeDefs = require("./schema")
-const resolvers = require("./resolvers")
+const connectToDatabase = require("./db")
+const startServer = require("./server")
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-})
+const MONGODB_URI = process.env.MONGODB_URI
+const PORT = process.env.PORT || 4000
 
-startStandaloneServer(server, {
-  listen: { port: 4000 },
-}).then(({ url }) => {
-  console.log(`Server ready at ${url}`)
-})
+const main = async () => {
+  await connectToDatabase(MONGODB_URI)
+  startServer(PORT)
+}
+
+main()
