@@ -3,10 +3,24 @@ const Author = require("./models/author")
 
 const resolvers = {
   Query: {
-    bookCount: () => Book.collection.countDocuments(),
-    authorCount: () => Author.collection.countDocuments(),
-    allBooks: () => Book.find({}),
-    allAuthors: () => Author.find({}),
+    bookCount: async () => Book.countDocuments({}),
+    authorCount: async () => Author.countDocuments({}),
+    allBooks: async (root, args) => {
+      if (args.author) {
+        const author = await Author.findOne({ name: args.author })
+        if (!author) {
+          return []
+        }
+        return await Book.find({ author: author._id })
+      }
+
+      if (args.genre) {
+        return await Book.find({ genres: args.genre })
+      }
+
+      return await Book.find({})
+    },
+    allAuthors: async () => await Author.find({}),
   },
   Mutation: {
     addBook: async (root, args) => {
@@ -28,7 +42,20 @@ const resolvers = {
       })
       return author.save()
     },
-    editAuthor: () => null,
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name })
+      if (!author) {
+        return null
+      }
+      author.born = args.setBornTo
+      return author.save()
+    },
+  },
+  Book: {
+    author: async root => await Author.findById(root.author),
+  },
+  Author: {
+    bookCount: async root => Book.countDocuments({ author: root._id }),
   },
 }
 

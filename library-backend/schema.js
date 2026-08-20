@@ -10,14 +10,17 @@ const typeDefs = `
   type Author {
     name: String!
     born: Int
-    bookCount: Int
+    bookCount: Int!
     id: ID!
   }
 
   type Query {
     bookCount: Int!
     authorCount: Int!
-    allBooks: [Book!]!
+    allBooks(
+      author: String
+      genre: String
+    ): [Book!]!
     allAuthors: [Author!]!
   }
 
@@ -41,4 +44,4 @@ const typeDefs = `
   }
 `
 
-module.exports = typeDefs;
+module.exports = typeDefs
