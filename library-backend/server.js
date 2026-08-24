@@ -4,14 +4,16 @@ const { startStandaloneServer } = require("@apollo/server/standalone")
 const typeDefs = require("./schema")
 const resolvers = require("./resolvers")
 
-const startServer = async port => {
+const startServer = async (port) => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
   })
 
   const { url } = await startStandaloneServer(server, {
-    listen: { port },
+    listen: {
+      port,
+    },
   })
 
   console.log(`Server ready at ${url}`)

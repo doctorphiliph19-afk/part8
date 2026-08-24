@@ -3,28 +3,55 @@ const Author = require("./models/author")
 
 const resolvers = {
   Query: {
-    bookCount: async () => Book.countDocuments({}),
-    authorCount: async () => Author.countDocuments({}),
+    bookCount: async () => {
+      return Book.countDocuments({})
+    },
+
+    authorCount: async () => {
+      return Author.countDocuments({})
+    },
+
     allBooks: async (root, args) => {
+      // Filter books by author
       if (args.author) {
-        const author = await Author.findOne({ name: args.author })
+        const author = await Author.findOne({
+          name: args.author,
+        })
+
         if (!author) {
           return []
         }
-        return await Book.find({ author: author._id })
+
+        return Book.find({
+          author: author._id,
+        })
       }
 
+      // Filter books by genre
       if (args.genre) {
-        return await Book.find({ genres: args.genre })
+        return Book.find({
+          genres: args.genre,
+        })
       }
 
-      return await Book.find({})
+      // Return all books
+      return Book.find({})
     },
-    allAuthors: async () => await Author.find({}),
+
+    allAuthors: async () => {
+      return Author.find({})
+    },
   },
+
   Mutation: {
     addBook: async (root, args) => {
-      const author = await Author.findOne({ name: args.author })
+      const author = await Author.findOne({
+        name: args.author,
+      })
+
+      if (!author) {
+        throw new Error(`Author '${args.author}' not found`)
+      }
 
       const book = new Book({
         title: args.title,
@@ -35,27 +62,43 @@ const resolvers = {
 
       return book.save()
     },
+
     addAuthor: async (root, args) => {
       const author = new Author({
         name: args.name,
         born: args.born,
       })
+
       return author.save()
     },
+
     editAuthor: async (root, args) => {
-      const author = await Author.findOne({ name: args.name })
+      const author = await Author.findOne({
+        name: args.name,
+      })
+
       if (!author) {
         return null
       }
+
       author.born = args.setBornTo
+
       return author.save()
     },
   },
+
   Book: {
-    author: async root => await Author.findById(root.author),
+    author: async (root) => {
+      return Author.findById(root.author)
+    },
   },
+
   Author: {
-    bookCount: async root => Book.countDocuments({ author: root._id }),
+    bookCount: async (root) => {
+      return Book.countDocuments({
+        author: root._id,
+      })
+    },
   },
 }
 

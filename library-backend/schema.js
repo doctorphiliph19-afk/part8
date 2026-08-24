@@ -1,4 +1,5 @@
 const typeDefs = `
+
   type Book {
     title: String!
     published: Int!
@@ -17,14 +18,23 @@ const typeDefs = `
   type Query {
     bookCount: Int!
     authorCount: Int!
+
     allBooks(
       author: String
       genre: String
     ): [Book!]!
+
     allAuthors: [Author!]!
   }
 
   type Mutation {
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]!
+    ): Book!
+
     addAuthor(
       name: String!
       born: Int
@@ -34,14 +44,8 @@ const typeDefs = `
       name: String!
       setBornTo: Int!
     ): Author
-
-    addBook(
-      title: String!
-      author: String!
-      published: Int!
-      genres: [String!]!
-    ): Book!
   }
+
 `
 
-module.exports = typeDefs;
+module.exports = typeDefs
