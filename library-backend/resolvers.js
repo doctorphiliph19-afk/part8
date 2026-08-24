@@ -82,17 +82,17 @@ const resolvers = {
   Mutation: {
     addBook: async (root, args, context) => {
       await requireUser(context)
-      const author = await Author.findOne({
-        name: args.author,
-      })
-
-      if (!author) {
-        throw new GraphQLError("Author not found", {
-          extensions: {
-            code: "BAD_USER_INPUT",
-          },
+      if (args.author.length < 4) {
+        throw new GraphQLError("Author name must be at least 4 characters", {
+          extensions: { code: "BAD_USER_INPUT" },
         })
       }
+
+      const author = await Author.findOneAndUpdate(
+        { name: args.author },
+        { $setOnInsert: { name: args.author } },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+      )
 
       const book = new Book({
         title: args.title,
@@ -179,6 +179,18 @@ const resolvers = {
       return {
         value: jwt.sign({ username: user.username, id: user._id }, JWT_SECRET),
       }
+    },
+
+    _resetDatabase: async () => {
+      if (process.env.NODE_ENV !== "test") {
+        throw new GraphQLError("_resetDatabase is only available in test mode")
+      }
+
+      await Author.deleteMany({})
+      await Book.deleteMany({})
+      await User.deleteMany({})
+
+      return true
     },
   },
 
