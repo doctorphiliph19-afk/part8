@@ -1,3 +1,5 @@
+const { GraphQLError } = require("graphql")
+
 const Book = require("./models/book")
 const Author = require("./models/author")
 
@@ -50,7 +52,11 @@ const resolvers = {
       })
 
       if (!author) {
-        throw new Error(`Author '${args.author}' not found`)
+        throw new GraphQLError("Author not found", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+          },
+        })
       }
 
       const book = new Book({
@@ -60,7 +66,15 @@ const resolvers = {
         genres: args.genres,
       })
 
-      return book.save()
+      try {
+        return await book.save()
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+          },
+        })
+      }
     },
 
     addAuthor: async (root, args) => {
@@ -69,7 +83,15 @@ const resolvers = {
         born: args.born,
       })
 
-      return author.save()
+      try {
+        return await author.save()
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+          },
+        })
+      }
     },
 
     editAuthor: async (root, args) => {
@@ -83,7 +105,15 @@ const resolvers = {
 
       author.born = args.setBornTo
 
-      return author.save()
+      try {
+        return await author.save()
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+          },
+        })
+      }
     },
   },
 
