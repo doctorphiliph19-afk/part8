@@ -1,7 +1,38 @@
 const { GraphQLError } = require("graphql")
+const jwt = require("jsonwebtoken")
 
 const Book = require("./models/book")
 const Author = require("./models/author")
+const User = require("./models/user")
+
+const JWT_SECRET = process.env.JWT_SECRET || "exercise-secret"
+
+const getUserFromToken = async (authorization, currentUser) => {
+  if (currentUser) {
+    return currentUser
+  }
+
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return null
+  }
+
+  try {
+    const decodedToken = jwt.verify(authorization.replace("Bearer ", ""), JWT_SECRET)
+    return User.findById(decodedToken.id)
+  } catch (error) {
+    return null
+  }
+}
+
+const requireUser = async context => {
+  const user = await getUserFromToken(context.authorization, context.currentUser)
+  if (!user) {
+    throw new GraphQLError("not authenticated", {
+      extensions: { code: "UNAUTHENTICATED" },
+    })
+  }
+  return user
+}
 
 const resolvers = {
   Query: {
@@ -43,10 +74,14 @@ const resolvers = {
     allAuthors: async () => {
       return Author.find({})
     },
+
+    me: async (root, args, context) =>
+      getUserFromToken(context.authorization, context.currentUser),
   },
 
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, context) => {
+      await requireUser(context)
       const author = await Author.findOne({
         name: args.author,
       })
@@ -94,7 +129,8 @@ const resolvers = {
       }
     },
 
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, context) => {
+      await requireUser(context)
       const author = await Author.findOne({
         name: args.name,
       })
@@ -113,6 +149,35 @@ const resolvers = {
             code: "BAD_USER_INPUT",
           },
         })
+      }
+    },
+
+    createUser: async (root, args) => {
+      const user = new User({
+        username: args.username,
+        favoriteGenre: args.favoriteGenre,
+        passwordHash: "secret",
+      })
+
+      try {
+        return await user.save()
+      } catch (error) {
+        throw new GraphQLError(error.message, {
+          extensions: { code: "BAD_USER_INPUT" },
+        })
+      }
+    },
+
+    login: async (root, args) => {
+      const user = await User.findOne({ username: args.username })
+      if (!user || args.password !== "secret") {
+        throw new GraphQLError("wrong credentials", {
+          extensions: { code: "BAD_USER_INPUT" },
+        })
+      }
+
+      return {
+        value: jwt.sign({ username: user.username, id: user._id }, JWT_SECRET),
       }
     },
   },

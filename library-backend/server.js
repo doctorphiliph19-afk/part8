@@ -14,6 +14,9 @@ const startServer = async (port) => {
     listen: {
       port,
     },
+    context: async ({ req }) => ({
+      authorization: req.headers.authorization,
+    }),
   })
 
   console.log(`Server ready at ${url}`)
