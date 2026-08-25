@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const bcrypt = require("bcryptjs")
 
 const schema = new mongoose.Schema({
   username: {
@@ -14,7 +15,7 @@ const schema = new mongoose.Schema({
   passwordHash: {
     type: String,
     required: true,
-    default: "secret",
+    default: () => bcrypt.hashSync("secret", 10),
   },
 })
 
