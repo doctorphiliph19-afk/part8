@@ -8,6 +8,7 @@ const Books = () => {
   const genreBooksResult = useQuery(ALL_BOOKS_WITH_GENRE, {
     variables: { genre },
     skip: !genre,
+    fetchPolicy: 'network-only',
   })
 
   if (allBooksResult.loading || genreBooksResult.loading) {
@@ -25,6 +26,16 @@ const Books = () => {
   const allBooks = allBooksResult.data.allBooks
   const books = genre ? genreBooksResult.data.allBooks : allBooks
   const genres = [...new Set(allBooks.flatMap((book) => book.genres))]
+
+  const selectGenre = async (selectedGenre) => {
+    await allBooksResult.refetch()
+    setGenre(selectedGenre)
+  }
+
+  const showAllGenres = async () => {
+    await allBooksResult.refetch()
+    setGenre(null)
+  }
 
   return (
     <div>
@@ -52,12 +63,12 @@ const Books = () => {
         {genres.map((availableGenre) => (
           <button
             key={availableGenre}
-            onClick={() => setGenre(availableGenre)}
+            onClick={() => selectGenre(availableGenre)}
           >
             {availableGenre}
           </button>
         ))}
-        <button onClick={() => setGenre(null)}>all genres</button>
+        <button onClick={showAllGenres}>all genres</button>
       </div>
     </div>
   )
