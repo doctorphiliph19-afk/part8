@@ -60,6 +60,7 @@ const typeDefs = `
     createUser(
       username: String!
       favoriteGenre: String!
+      password: String = "secret"
     ): User
 
     login(

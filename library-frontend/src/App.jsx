@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useApolloClient } from '@apollo/client/react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import BookForm from './components/BookForm'
@@ -10,10 +11,13 @@ const App = () => {
   const [token, setToken] = useState(() =>
     localStorage.getItem('library-user-token'),
   )
+  const client = useApolloClient()
 
   const logout = () => {
     localStorage.removeItem('library-user-token')
     setToken(null)
+    setPage('authors')
+    client.resetStore()
   }
 
   return (
@@ -33,7 +37,9 @@ const App = () => {
       {page === 'authors' && token && <AuthorForm />}
       {page === 'books' && <Books />}
       {page === 'add' && token && <BookForm />}
-      {page === 'login' && !token && <LoginForm setToken={setToken} />}
+      {page === 'login' && !token && (
+        <LoginForm setToken={setToken} setPage={setPage} />
+      )}
     </div>
   )
 }

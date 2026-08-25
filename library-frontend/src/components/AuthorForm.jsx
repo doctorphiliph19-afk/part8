@@ -37,12 +37,13 @@ const AuthorForm = () => {
 
   return (
     <div>
-      <h2>set birth year</h2>
+      <h2>Set birthyear</h2>
       <form onSubmit={submit}>
         <div>
           <label>
             name
             <select
+              name="name"
               value={name}
               onChange={({ target }) => setName(target.value)}
               required

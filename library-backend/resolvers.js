@@ -1,4 +1,5 @@
 const { GraphQLError } = require("graphql")
+const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
 const Book = require("./models/book")
@@ -156,7 +157,7 @@ const resolvers = {
       const user = new User({
         username: args.username,
         favoriteGenre: args.favoriteGenre,
-        passwordHash: "secret",
+        passwordHash: await bcrypt.hash(args.password, 10),
       })
 
       try {
@@ -170,7 +171,8 @@ const resolvers = {
 
     login: async (root, args) => {
       const user = await User.findOne({ username: args.username })
-      if (!user || args.password !== "secret") {
+      const passwordMatches = user && await bcrypt.compare(args.password, user.passwordHash)
+      if (!passwordMatches) {
         throw new GraphQLError("wrong credentials", {
           extensions: { code: "BAD_USER_INPUT" },
         })
