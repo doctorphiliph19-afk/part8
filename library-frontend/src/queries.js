@@ -1,3 +1,17 @@
+
+export const BOOK_ADDED = gql`
+  subscription bookAdded {
+    bookAdded {
+      title
+      published
+      author {
+        name
+      }
+      genres
+      id
+    }
+  }
+`
 import { gql } from '@apollo/client'
 
 export const LOGIN = gql`

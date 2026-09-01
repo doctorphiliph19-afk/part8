@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@apollo/client/react'
-import { ALL_BOOKS, ALL_BOOKS_WITH_GENRE } from '../queries'
+import { useQuery, useSubscription } from '@apollo/client/react'
+import { ALL_BOOKS, ALL_BOOKS_WITH_GENRE, BOOK_ADDED } from '../queries'
 
 const Books = () => {
   const [genre, setGenre] = useState(null)
@@ -12,6 +12,19 @@ const Books = () => {
     refetch: refetchAllBooks,
   } = useQuery(ALL_BOOKS)
 
+    // Subscribe to new books
+    useSubscription(BOOK_ADDED, {
+      onData: ({ data }) => {
+        if (data.data?.bookAdded) {
+          console.log('New book added:', data.data.bookAdded)
+          // Refetch all books to update cache
+          refetchAllBooks()
+        }
+      },
+      onError: (err) => {
+        console.error('Subscription error:', err)
+      },
+    })
   const {
     data: genreBooksData,
     loading: genreBooksLoading,

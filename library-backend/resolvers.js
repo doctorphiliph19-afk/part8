@@ -1,10 +1,13 @@
 const { GraphQLError } = require("graphql")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const { PubSub } = require("graphql-subscriptions")
 
 const Book = require("./models/book")
 const Author = require("./models/author")
 const User = require("./models/user")
+
+const pubsub = new PubSub()
 
 const JWT_SECRET = process.env.JWT_SECRET || "exercise-secret"
 
@@ -103,7 +106,15 @@ const resolvers = {
       })
 
       try {
-        return await book.save()
+        const savedBook = await book.save()
+        const populatedBook = await savedBook.populate('author')
+
+        // Notify all bookAdded subscribers
+        pubsub.publish('BOOK_ADDED', {
+          bookAdded: populatedBook,
+        })
+
+        return populatedBook
       } catch (error) {
         throw new GraphQLError(error.message, {
           extensions: {
@@ -210,6 +221,12 @@ const resolvers = {
       return Book.countDocuments({
         author: root._id,
       })
+    },
+  },
+
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterableIterator('BOOK_ADDED'),
     },
   },
 }
