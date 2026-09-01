@@ -5,28 +5,58 @@ import { ALL_BOOKS, ALL_BOOKS_WITH_GENRE } from '../queries'
 const Books = () => {
   const [genre, setGenre] = useState(null)
 
-  const allBooksResult = useQuery(ALL_BOOKS)
+  const {
+    data: allBooksData,
+    loading: allBooksLoading,
+    error: allBooksError,
+    refetch: refetchAllBooks,
+  } = useQuery(ALL_BOOKS)
 
-  const genreBooksResult = useQuery(ALL_BOOKS_WITH_GENRE, {
+  const {
+    data: genreBooksData,
+    loading: genreBooksLoading,
+    error: genreBooksError,
+    refetch: refetchGenreBooks,
+  } = useQuery(ALL_BOOKS_WITH_GENRE, {
     variables: {
       genre,
     },
     skip: !genre,
   })
 
-  if (allBooksResult.loading || genreBooksResult.loading) {
+  if (allBooksLoading || genreBooksLoading) {
     return <div>loading...</div>
   }
 
-  if (allBooksResult.error || genreBooksResult.error) {
-    const error = allBooksResult.error || genreBooksResult.error
+  if (allBooksError || genreBooksError) {
+    const error = allBooksError || genreBooksError
     return <div>Error: {error.message}</div>
   }
 
-  const allBooks = allBooksResult.data.allBooks
-  const books = genre ? genreBooksResult.data.allBooks : allBooks
+  const allBooks = allBooksData.allBooks
+  const books = genre ? genreBooksData?.allBooks || [] : allBooks
 
   const genres = [...new Set(allBooks.flatMap(book => book.genres))]
+
+  const selectGenre = async selectedGenre => {
+    setGenre(selectedGenre)
+
+    // Make sure the latest books are fetched from the server
+    await refetchAllBooks()
+
+    if (selectedGenre) {
+      await refetchGenreBooks({
+        genre: selectedGenre,
+      })
+    }
+  }
+
+  const showAllGenres = async () => {
+    setGenre(null)
+
+    // Refresh all books when the user selects "all genres"
+    await refetchAllBooks()
+  }
 
   return (
     <div>
@@ -52,16 +82,11 @@ const Books = () => {
       </table>
       <div>
         {genres.map(g => (
-          <button
-            key={g}
-            onClick={() => setGenre(g)}
-          >
+          <button key={g} onClick={() => selectGenre(g)}>
             {g}
           </button>
         ))}
-        <button onClick={() => setGenre(null)}>
-          all genres
-        </button>
+        <button onClick={showAllGenres}>all genres</button>
       </div>
     </div>
   )
