@@ -1,27 +1,31 @@
 import { useState } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { ALL_BOOKS } from '../queries'
+import { ALL_BOOKS, BOOKS_BY_GENRE } from '../queries'
 
 const Books = () => {
   const [genre, setGenre] = useState(null)
 
-  const result = useQuery(ALL_BOOKS)
+  const allBooksResult = useQuery(ALL_BOOKS)
 
-  if (result.loading) {
+  const booksResult = useQuery(BOOKS_BY_GENRE, {
+    variables: {
+      genre,
+    },
+  })
+
+  if (allBooksResult.loading || booksResult.loading) {
     return <div>loading...</div>
   }
 
-  if (result.error) {
-    return <div>Error: {result.error.message}</div>
+  if (allBooksResult.error || booksResult.error) {
+    const error = allBooksResult.error || booksResult.error
+    return <div>Error: {error.message}</div>
   }
 
-  const books = result.data.allBooks
+  const allBooks = allBooksResult.data.allBooks
+  const books = booksResult.data.allBooks
 
-  const booksToShow = genre
-    ? books.filter(book => book.genres.includes(genre))
-    : books
-
-  const genres = [...new Set(books.flatMap(book => book.genres))]
+  const genres = [...new Set(allBooks.flatMap(book => book.genres))]
 
   return (
     <div>
@@ -36,7 +40,7 @@ const Books = () => {
           </tr>
         </thead>
         <tbody>
-          {booksToShow.map(book => (
+          {books.map(book => (
             <tr key={book.id}>
               <td>{book.title}</td>
               <td>{book.author.name}</td>
