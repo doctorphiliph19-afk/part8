@@ -1,41 +1,27 @@
 import { useState } from 'react'
 import { useQuery } from '@apollo/client/react'
-import { ALL_BOOKS, ALL_BOOKS_WITH_GENRE } from '../queries'
+import { ALL_BOOKS } from '../queries'
 
 const Books = () => {
   const [genre, setGenre] = useState(null)
-  const allBooksResult = useQuery(ALL_BOOKS)
-  const genreBooksResult = useQuery(ALL_BOOKS_WITH_GENRE, {
-    variables: { genre },
-    skip: !genre,
-    fetchPolicy: 'network-only',
-  })
 
-  if (allBooksResult.loading || genreBooksResult.loading) {
+  const result = useQuery(ALL_BOOKS)
+
+  if (result.loading) {
     return <div>loading...</div>
   }
 
-  if (allBooksResult.error) {
-    return <div>Error: {allBooksResult.error.message}</div>
+  if (result.error) {
+    return <div>Error: {result.error.message}</div>
   }
 
-  if (genreBooksResult.error) {
-    return <div>Error: {genreBooksResult.error.message}</div>
-  }
+  const books = result.data.allBooks
 
-  const allBooks = allBooksResult.data.allBooks
-  const books = genre ? genreBooksResult.data.allBooks : allBooks
-  const genres = [...new Set(allBooks.flatMap((book) => book.genres))]
+  const booksToShow = genre
+    ? books.filter(book => book.genres.includes(genre))
+    : books
 
-  const selectGenre = async (selectedGenre) => {
-    await allBooksResult.refetch()
-    setGenre(selectedGenre)
-  }
-
-  const showAllGenres = async () => {
-    await allBooksResult.refetch()
-    setGenre(null)
-  }
+  const genres = [...new Set(books.flatMap(book => book.genres))]
 
   return (
     <div>
@@ -50,7 +36,7 @@ const Books = () => {
           </tr>
         </thead>
         <tbody>
-          {books.map((book) => (
+          {booksToShow.map(book => (
             <tr key={book.id}>
               <td>{book.title}</td>
               <td>{book.author.name}</td>
@@ -60,15 +46,17 @@ const Books = () => {
         </tbody>
       </table>
       <div>
-        {genres.map((availableGenre) => (
+        {genres.map(g => (
           <button
-            key={availableGenre}
-            onClick={() => selectGenre(availableGenre)}
+            key={g}
+            onClick={() => setGenre(g)}
           >
-            {availableGenre}
+            {g}
           </button>
         ))}
-        <button onClick={showAllGenres}>all genres</button>
+        <button onClick={() => setGenre(null)}>
+          all genres
+        </button>
       </div>
     </div>
   )
